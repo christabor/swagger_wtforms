@@ -110,7 +110,10 @@ def set_fields(form, properties, exclude=[], required_fields=[]):
         if enum is not None:
             typ = 'enum'
 
-        mapped = mappers.get_context_field(typ, 'wtforms')
+        try:
+            mapped = mappers.get_context_field(typ, 'wtforms')
+        except:
+            mapped = None
 
         if mapped is not None:
             validators = get_validators_for_field(

@@ -1,0 +1,25 @@
+{% extends "layouts/base.html" %}
+
+{% from 'macros.html' import wtform_form %}
+
+{% block body %}
+<h2>Example rendering</h2>
+<p>API url for this is: <strong>{{ url }}</strong></p>
+
+<div class="well">
+    <h3>{{ name }}</h3>
+    {{
+        wtform_form(
+            form,
+            method='POST',
+            action=url_for('index'),
+            btn_classes=['btn', 'btn-md', 'btn-success'],
+            btn_text='Go',
+            horizontal=True,
+            align='left',
+            input_classes=['form-control'],
+            reset_btn=False,
+        )
+    }}
+</div>
+{% endblock %}

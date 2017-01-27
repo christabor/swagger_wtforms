@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title></title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.3.7/css/bootstrap.min.css">
+</head>
+<body>
+    <div class="container-fluid">
+        <div class="row">
+            <div class="col-md-2">
+                <h3>Examples</h3>
+                <ul class="list-group">
+                    <li class="list-group-item">
+                        <a href="{{ url_for('index') }}">Single form</a>
+                    </li>
+                    <li class="list-group-item">
+                        <a href="{{ url_for('multiple') }}">All forms from definitions</a>
+                    </li>
+                </ul>
+            </div>
+            <div class="col-md-10">
+                {% block body %}
+                {% endblock %}
+            </div>
+        </div>
+    </div>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.3.7/js/bootstrap.min.js"></script>
+</body>
+</html>

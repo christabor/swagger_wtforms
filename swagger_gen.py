@@ -12,7 +12,7 @@ def is_resource_collection(properties):
     If so, it wouldn't need to be used for generating a form, since it's
     not a single resource.
     """
-    for propname, conf in properties.items():
+    for prop, conf in properties.items():
         if conf.get('type') == 'array' and 'items' in conf:
             return True
     return False
@@ -47,14 +47,14 @@ def get_default_form():
     return SwaggerCustomForm
 
 
-def get_validators_for_field(propname, conf, required=[]):
-    """Determine which validators to add for the form."""
+def get_validators(prop, conf, required=[]):
+    """Determine which validators to add for a field."""
     _validators = []
 
     min_len = conf.get('minLength')
     max_len = conf.get('maxLength')
 
-    if propname in required or conf.get('required'):
+    if prop in required or conf.get('required'):
         _validators.append(validators.DataRequired())
 
     # Deal with max/min lengths
@@ -96,33 +96,77 @@ def get_form_from_path(path, method, paths, exclude=[]):
     return custom_form
 
 
+def get_collection_fmt_desc(colltype):
+    """Return the appropriate description for a collection type.
+
+    E.g. tsv needs to indicate that the items should be tab separated,
+    csv comma separated, etc...
+    """
+    seps = dict(
+        csv='Multiple items can be separated with a comma',
+        ssv='Multiple items can be separated with a space',
+        tsv='Multiple items can be separated with a tab',
+        pipes='Multiple items can be separated with a pipe (|)',
+        multi='',
+    )
+    if colltype in seps:
+        return seps[colltype]
+    return ''
+
+
+def get_mapped_field(typ):
+    """Get the equivalently mapped type."""
+    try:
+        return mappers.get_context_field(typ, 'wtforms')
+    except:
+        return
+
+
+def fmt_given_desc(desc):
+    """Additional formatting for a web UI with the base description."""
+    # Ensure always ends with period.
+    if not desc.endswith('.'):
+        desc += '.'
+    # Capitalize first letter.
+    desc = '{}{}'.format(desc[0].upper(), desc[1:])
+    return desc
+
+
 def set_fields(form, properties, exclude=[], required_fields=[]):
     """Set fields for a path spec OR a definition spec."""
-    for propname, conf in properties.items():
+    for prop, conf in properties.items():
         # Allow excluding of any fields.
-        if propname in exclude:
+        if prop in exclude:
             continue
         typ = conf['type']
         default = conf.get('default', '')
         title = conf.get('title')
         enum = conf.get('enum')
+        desc = fmt_given_desc(conf.get('description', ''))
+        is_collection = conf.get('items')
+        coll_fmt = conf.get('collectionFormat')
+
+        if typ == 'array':
+            # This needs to be text-field so
+            # users can add comma/tab/etc separated items.
+            # This one does not map very well so it's an edge case.
+            typ = 'str'
 
         if enum is not None:
             typ = 'enum'
 
-        try:
-            mapped = mappers.get_context_field(typ, 'wtforms')
-        except:
-            mapped = None
+        mapped = get_mapped_field(typ)
+
+        if is_collection and coll_fmt:
+            desc = '{} {}'.format(desc, get_collection_fmt_desc(coll_fmt))
 
         if mapped is not None:
-            validators = get_validators_for_field(
-                propname, conf, required=required_fields)
+            validators = get_validators(prop, conf, required=required_fields)
             kwargs = dict(
                 default=default,
                 validators=validators,
                 # TODO: handle markdown descriptions etc.
-                description=conf.get('description', ''),
+                description=desc,
             )
             if enum is not None:
                 kwargs.update(choices=[(c, c) for c in enum])
@@ -130,7 +174,7 @@ def set_fields(form, properties, exclude=[], required_fields=[]):
                 mapped = mapped(title, **kwargs)
             else:
                 mapped = mapped(**kwargs)
-        setattr(form, propname, mapped)
+        setattr(form, prop, mapped)
     return form
 
 

@@ -8,6 +8,11 @@
 <body>
     <div class="container-fluid">
         <div class="row">
+            <div class="col-md-12">
+                <h2 class="lead">Swagger-wtforms <em>example</em></h2>
+            </div>
+        </div>
+        <div class="row">
             <div class="col-md-2">
                 <h3>Examples</h3>
                 <ul class="list-group">
@@ -20,8 +25,12 @@
                 </ul>
             </div>
             <div class="col-md-10">
-                {% block body %}
-                {% endblock %}
+                {% block body %}{% endblock %}
+                <hr>
+                <h3>The spec (<em>{{ file }}</em>)</h3>
+                <pre>
+                    <code>{{ spec }}</code>
+                </pre>
             </div>
         </div>
     </div>

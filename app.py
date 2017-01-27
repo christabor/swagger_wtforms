@@ -28,17 +28,13 @@ FlaskExtras(app)
 def index():
     """Homepage."""
     spec = load(open(cwd + '/example_specs/uber.yaml', 'r').read())
-    defs = spec.get('definitions')
     paths = spec.get('paths')
     product_form = swagger_gen.get_form_from_path('/products', 'GET', paths)
     form = product_form()
     if request.method == 'POST':
         # Trigger errors for testing
         form.validate_on_submit()
-    kwargs = dict(
-        url='/products',
-        form=form, name='Product form',
-        spec=json.dumps(defs, indent=4))
+    kwargs = dict(url='/products', form=form, name='Product form')
     return render_template('pages/index.html', **kwargs)
 
 
@@ -47,7 +43,7 @@ def multiple():
     """Multiple forms for all defs."""
     spec = open(cwd + '/example_specs/uber.yaml', 'r').read()
     defs = load(spec).get('definitions')
-    forms = swagger_gen.get_forms_from_defs(defs)
+    forms = swagger_gen.get_forms_from_defs(defs, exclude=['Error'])
     if request.method == 'POST':
         # Trigger errors for testing
         for _, form in forms.items():

@@ -30,7 +30,7 @@ def get_forms_from_defs(defs,
     forms = dict()
     for resource, conf in defs.items():
         if resource in exclude:
-            pass
+            continue
         form = get_form_from_def(conf, exclude=exclude_fields)
         if instantiate and form is not None:
             form = form()
